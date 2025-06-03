@@ -317,3 +317,333 @@ Si vous rencontrez des problèmes avec l'application :
 
 1. Ajouter une entité "PoliticienTypeDelit", qui sera une relation ManyToMany entre "User" et "TypeDelit". Cela permettra de lier un politicien à un type de délit spécifique.
 2. Ajouter une entité "StatutDelit", qui sera une relation OneToMany entre "Delit" et "StatutDélit". Cela permettra de suivre le statut d'un délit (par exemple, en cours, résolu, etc.).
+
+
+
+
+
+                                                        ┌────────────────────────┐
+                                                        │         PARTI          │
+                                                        │────────────────────────│
+                                                        │⚫ id                    │
+                                                        │  nom UNIQUE            │
+                                                        │  couleur               │
+                                                        │  slogan                │
+                                                        │  logo                  │
+                                                        │  dateCreation          │
+                                                        │  description TEXT      │
+                                                        │🆕 siteWeb              │
+                                                        │🆕 adresseSiege         │
+                                                        │🆕 telephoneContact     │
+                                                        │🆕 emailContact         │
+                                                        │🆕 presidentActuel      │
+                                                        │🆕 orientationPolitique │
+                                                        │🆕 budgetAnnuel         │
+                                                        │🆕 nombreAdherents      │
+                                                        │🆕 partiActif (BOOL)    │
+                                                        └────────────────────────┘
+                                                                  ▲
+                                                                  │
+                                                   "appartient_à" │ M..1
+                                                                  │
+┌──────────────────────────┐        héritage        ┌───────────────────────────────────────────┐
+│          USER            │──────────────────────▶│               POLITICIEN                   │
+│──────────────────────────│   («discr»='politicien')│───────────────────────────────────────────│
+│⚫ id                      │                        │(hérite de USER)                           │
+│ email UNIQUE             │                        │🔑 parti_id → PARTI                         │
+│ password                 │                        │ biographie TEXT                            │
+│ roles JSON               │                        │ photo                                      │
+│ firstName / lastName     │                        │🆕 fonction                                 │
+│ dateCreation             │                        │🆕 dateEntreePolitique                      │
+│ derniereConnexion        │                        │🆕 mandatActuel                             │
+│ estActif (BOOL)          │                        │🆕 circonscription                          │
+│ discr ('user','politicien')│                      │🆕 salaireMensuel                           │
+│🆕 telephone               │                        │🆕 declarationPatrimoine JSON               │
+│🆕 adresse                 │                        │🆕 casierJudiciaire (BOOL)                  │
+│🆕 dateNaissance           │                        └───────────────────────────────────────────┘
+│🆕 nationalite             │                                        ▲
+│🆕 profession              │                                        │
+└──────────────────────────┘                                        │ héritage
+          ▲                                                         │
+          │ héritage                                                │
+          │                                                          │
+          └────────────── inheritance («discr»='user')               │
+                                                                     │
+                                                  ┌───────────────────────────────┐
+                                                  │             DELIT             │
+                                                  │───────────────────────────────│
+                                                  │⚫ id                           │
+                                                  │ type SIMPLE_ARRAY              │
+                                                  │ description TEXT               │
+                                                  │ date                           │
+                                                  │🔑 lieu_id → LIEU               │
+                                                  │ discr                          │
+                                                  │🆕 statut                       │
+                                                  │🆕 gravite                      │
+                                                  │🆕 dateDeclaration              │
+                                                  │🆕 numeroAffaire                │
+                                                  │🆕 procureurResponsable         │
+                                                  │🆕 temoinsPrincipaux JSON        │
+                                                  │🆕 preuvesPrincipales JSON       │
+                                                  └───────────────────────────────┘
+                                                           ▲     ▲     ▲
+             "auteur_de" 1..M                              │     │     │ héritages
+                 │                                         │     │     │
+                 │                                         │     │     ├──────────────────────────┐
+                 │                                         │     │     │ DELITFINANCIER           │
+                 │                                         │     │     │──────────────────────────│
+┌──────────────────────────┐    "signale"                   │     │     │(hérite de DELIT)         │
+│       POLITICIEN         │─────────────────────────────────┘     │     │🆕 montantEstime (BIGINT)  │
+│──────────────────────────│    M..M                                      │     │🆕 devise                   │
+│… (champs déjà listés)    │                                               │     │🆕 methodePaiement          │
+└──────────────────────────┘                                               │     │🆕 compteBancaire           │
+                                                                           │     │🆕 paradisFiscal            │
+                                                                           │     │🆕 blanchimentSoupçonne BOOL│
+                                                                           │     │🆕 institutionsImpliquees JSON│
+                                                                           │     │🆕 circuitFinancier TEXT     │
+                                                                           │     │🆕 montantRecupere (BIGINT)  │
+                                                                           │     │🆕 argentRecupere BOOL       │
+                                                                           │     └──────────────────────────┘
+                                                                           │ héritage
+                                                                           │
+                                                                           ├──────────────────────────┐
+                                                                           │ DELITFRAUDE              │
+                                                                           │──────────────────────────│
+                                                                           │(hérite de DELIT)         │
+                                                                           │🆕 typeFraude              │
+                                                                           │🆕 documentsManipules JSON  │
+                                                                           │🆕 nombreVictimes          │
+                                                                           │🆕 prejudiceEstime (BIGINT) │
+                                                                           │🆕 methodeFraude TEXT       │
+                                                                           │🆕 complicesIdentifies JSON │
+                                                                           │🆕 systemeInformatique BOOL  │
+                                                                           │🆕 fraudeOrganisee BOOL      │
+                                                                           └──────────────────────────┘
+                                                                           │ héritage
+                                                                           │
+                                                                           └──────────────────────────┐
+                                                                                                       │
+                                                                                                       │ héritage
+                                                                                                       │
+                                                                                       ┌──────────────────────────┐
+                                                                                       │   DELITVOL               │
+                                                                                       │──────────────────────────│
+                                                                                       │(hérite de DELIT)         │
+                                                                                       │🆕 typeVol                │
+                                                                                       │🆕 biensDerobes JSON       │
+                                                                                       │🆕 valeurEstimee (BIGINT)  │
+                                                                                       │🆕 methodeDerriereVol TEXT │
+                                                                                       │🆕 lieuStockage           │
+                                                                                       │🆕 biensRecuperes BOOL     │
+                                                                                       │🆕 pourcentageRecupere     │
+                                                                                       │🆕 receleurs JSON          │
+                                                                                       │🆕 volPremedite BOOL       │
+                                                                                       └──────────────────────────┘
+
+
+┌──────────────────────────┐            "lieu_du_délit"  M..1        ┌──────────────────────────┐
+│          LIEU            │────────────────────────────────────────▶│          LIEU            │
+│──────────────────────────│                                          │──────────────────────────│
+│⚫ id                      │◀──────────────────────────────────────── │⚫ id                      │
+│ adresse                  │  (c’est la même table LIEU : on note ici  │ adresse                  │
+│ ville                    │   qu’un DELIT référence un LIEU)          │ ville                    │
+│ pays                     │                                          │ pays                     │
+│ codePostal               │                                          │ codePostal               │
+│🆕 latitude               │                                          │🆕 latitude               │
+│🆕 longitude              │                                          │🆕 longitude              │
+│🆕 typeEtablissement       │                                          │🆕 typeEtablissement       │
+│🆕 estPublic (BOOL)       │                                          │🆕 estPublic (BOOL)       │
+│🆕 niveauSecurite         │                                          │🆕 niveauSecurite         │
+│🆕 capaciteAccueil        │                                          │🆕 capaciteAccueil        │
+│🆕 horaireAcces           │                                          │🆕 horaireAcces           │
+│🆕 responsableSecurite    │                                          │🆕 responsableSecurite    │
+│🆕 videoSurveillance BOOL │                                          │🆕 videoSurveillance BOOL │
+└──────────────────────────┘                                          └──────────────────────────┘
+
+
+┌───────────────────────────┐       "implique" M..M      ┌───────────────────────────┐
+│        DELIT (vue)        │───────────────────────────▶│       PARTENAIRE          │
+│───────────────────────────│                           │───────────────────────────│
+│⚫ id                       │◀───────────────────────────│⚫ id                       │
+│ type SIMPLE_ARRAY         │         (relation N‐N)     │ nom                        │
+│ description TEXT          │                           │ email                      │
+│ date                      │                           │ telephone                  │
+│🔑 lieu_id → LIEU          │                           │ adresse                    │
+│ discr                     │                           │ siteWeb                    │
+│🆕 … (autres champs)       │                           │ notes TEXT                 │
+└───────────────────────────┘                           │ niveauRisque               │
+                                                            │ discr ('physique','moral') │
+                                                            │🆕 ville                    │
+                                                            │🆕 codePostal               │
+                                                            │🆕 pays                     │
+                                                            │🆕 datePremiereCollab       │
+                                                            │🆕 nombreDelitsImplique     │
+                                                            │🆕 estActif (BOOL)          │
+                                                            │🆕 commentairesInternes TEXT │
+                                                            └───────────────────────────┘
+                                                                   ▲     ▲
+                                                                   │     │ héritages
+                                                 héritage           │     │
+                         ┌───────────────────────────┐   inherits     │     ├───────────────────────────┐
+                         │   PARTENAIREPHYSIQUE      │◀───────────────┘     │   PARTENAIREMORAL         │
+                         │───────────────────────────│                     │───────────────────────────│
+                         │(hérite de PARTENAIRE)      │                     │(hérite de PARTENAIRE)      │
+                         │🆕 prenom                   │                     │🆕 raisonSociale            │
+                         │🆕 nomFamille               │                     │🆕 formeJuridique           │
+                         │🆕 dateNaissance            │                     │🆕 siret                    │
+                         │🆕 lieuNaissance            │                     │🆕 numeroTVA                │
+                         │🆕 nationalite              │                     │🆕 secteurActivite          │
+                         │🆕 profession               │                     │🆕 dirigeantPrincipal       │
+                         │🆕 numeroSecu               │                     │🆕 chiffreAffaires (BIGINT)  │
+                         │🆕 numeroCNI                │                     │🆕 nombreEmployes           │
+                         │🆕 adresseSecondaire        │                     │🆕 paysFiscal               │
+                         │🆕 telephoneSecondaire      │                     │🆕 dateCreationEntreprise   │
+                         │🆕 situationFamiliale       │                     │🆕 capitalSocial (BIGINT)    │
+                         │🆕 personnesACharge         │                     │🆕 actionnairePrincipal     │
+                         │🆕 niveauEtudes             │                     │🆕 coteeEnBourse (BOOL)      │
+                         │🆕 casierJudiciaire (BOOL)   │                     │🆕 filiales JSON             │
+                         │🆕 fortuneEstimee (BIGINT)   │                     │🆕 licences JSON             │
+                         └───────────────────────────┘                     │🆕 certifications JSON       │
+                                                                              └───────────────────────────┘
+
+
+┌───────────────────────────┐
+│        COMMENTAIRE        │
+│───────────────────────────│
+│⚫ id                       │
+│ contenu TEXT              │
+│ dateCreation / modif      │
+│🔑 delit_id → DELIT        │
+│🔑 auteur_id → POLITICIEN  │
+│ commentaireParent_id (self)│
+│🆕 estModere (BOOL)         │
+│🆕 scoreCredibilite (1–100) │
+│🆕 typeCommentaire         │
+│🆕 domaineExpertise        │
+│🆕 estPublic (BOOL)        │
+│🆕 nombreLikes / nombreDislikes│
+│🆕 estSignale (BOOL)         │
+│🆕 raisonSignalement       │
+└───────────────────────────┘
+          ▲
+          │ "commenté_par" 1..M
+          │
+┌───────────────────────────┐
+│          DELIT            │
+│      (déjà ci-dessus)     │
+└───────────────────────────┘
+
+
+┌───────────────────────────┐
+│         DOCUMENT          │
+│───────────────────────────│
+│⚫ id                       │
+│ nom                       │
+│ chemin                    │
+│ dateCreation              │
+│ description TEXT          │
+│🔑 delit_id → DELIT        │
+│🔑 auteur_id → POLITICIEN  │
+│🔑 documentParent_id (self)│
+│ discr (‘image’,’video’,…)  │
+│🆕 niveauConfidentialite    │
+│🆕 dateDeclassification     │
+│🆕 sourceInformation       │
+│🆕 personnesAutorisees JSON │
+│🆕 nombreConsultations      │
+│🆕 derniereConsultation     │
+│🆕 estArchive (BOOL)         │
+│🆕 checksum                 │
+│🆕 motsCles JSON            │
+│🆕 langueDocument           │
+└───────────────────────────┘
+        ▲   ▲   ▲   ▲
+        │   │   │   │ héritages
+        │   │   │   ├───────────────┐
+        │   │   │   │ DOCUMENTIMAGE  │
+        │   │   │   │───────────────│
+        │   │   │   │(hérite de DOC) │
+        │   │   │   │🆕 formatImage    │
+        │   │   │   │🆕 largeur        │
+        │   │   │   │🆕 hauteur        │
+        │   │   │   │🆕 resolution     │
+        │   │   │   │🆕 datePhoto      │
+        │   │   │   │🆕 lieuPhoto      │
+        │   │   │   │🆕 appareilPhoto  │
+        │   │   │   │🆕 coordonneesGPS │
+        │   │   │   │🆕 estRetouchee BOOL│
+        │   │   │   │🆕 logicielRetouche│
+        │   │   │   │🆕 metadonneesExif│
+        │   │   │   │🆕 personnesIdentifiées JSON│
+        │   │   │   │🆕 qualiteImage   │
+        │   │   │   │🆕 thumbnailPath │
+        │   │   │   └───────────────┘
+        │   │   │ héritage         ▲
+        │   │   ├─────────────────┘
+        │   │   │ DOCUMENTVIDEO   │
+        │   │   │───────────────│
+        │   │   │(hérite de DOC) │
+        │   │   │🆕 formatVideo    │
+        │   │   │🆕 duree          │
+        │   │   │🆕 resolution     │
+        │   │   │🆕 frameRate      │
+        │   │   │🆕 codec          │
+        │   │   │🆕 qualiteVideo   │
+        │   │   │🆕 avecSon BOOL    │
+        │   │   │🆕 sousTitres BOOL │
+        │   │   │🆕 langueAudio    │
+        │   │   │🆕 dateEnregistrement│
+        │   │   │🆕 lieuEnregistrement│
+        │   │   │🆕 materielEnregistrement│
+        │   │   │🆕 personnesFilmees JSON│
+        │   │   │🆕 timestampsImportants JSON│
+        │   │   │🆕 thumbnailPath  │
+        │   │   │🆕 urlStreamingExterne│
+        │   │   │🆕 plateformeHebergement│
+        │   │   └───────────────┘
+        │   │ héritage
+        │   ├──────────────────┐
+        │   │ DOCUMENTAUDIO    │
+        │   │───────────────│
+        │   │(hérite de DOC) │
+        │   │🆕 formatAudio    │
+        │   │🆕 duree          │
+        │   │🆕 bitrate        │
+        │   │🆕 frequenceEchantillonnage│
+        │   │🆕 nombreCanaux   │
+        │   │🆕 qualiteAudio   │
+        │   │🆕 dateEnregistrement│
+        │   │🆕 lieuEnregistrement│
+        │   │🆕 materielEnregistrement│
+        │   │🆕 personnesEnregistrees JSON│
+        │   │🆕 transcriptionTexte TEXT│
+        │   │🆕 transcriptionValidee BOOL│
+        │   │🆕 languePrincipale│
+        │   │🆕 motsClesAudio JSON│
+        │   │🆕 niveauSonore   │
+        │   │🆕 filtresAppliqués JSON│
+        │   └───────────────┘
+        │ héritage
+        └───────────────────┐
+                            │ DOCUMENTFICHIER │
+                            │───────────────│
+                            │(hérite de DOC) │
+                            │🆕 typeFichier    │
+                            │🆕 formatFichier  │
+                            │🆕 nombrePages    │
+                            │🆕 estSigneNumeriquement BOOL│
+                            │🆕 signataires JSON│
+                            │🆕 dateSignature  │
+                            │🆕 autoriteSignature│
+                            │🆕 numeroDocument │
+                            │🆕 versionDocument│
+                            │🆕 documentOriginal BOOL│
+                            │🆕 contenuExtrait TEXT│
+                            │🆕 indexeRecherche BOOL│
+                            │🆕 motsClesDocument JSON│
+                            │🆕 clausesImportantes JSON│
+                            │🆕 montantsMentionnés JSON│
+                            │🆕 personnesMentionnées JSON│
+                            │🆕 dateValidite    │
+                            └───────────────────┘
+
