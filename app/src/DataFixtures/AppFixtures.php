@@ -18,6 +18,7 @@ use App\Enum\DocumentNiveauConfidentialiteEnum;
 use App\Enum\PartenaireNiveauRisqueEnum;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Faker\Factory;
 
 class AppFixtures extends Fixture
 {
@@ -711,36 +712,40 @@ class AppFixtures extends Fixture
 
     private function createPartenaires(ObjectManager $manager): array
     {
+        $faker = Factory::create('fr_FR');
         $partenaires = [];
-        for ($i = 1; $i <= 10; $i++) {
+
+        for ($i = 1; $i <= 5; $i++) {
             if ($i % 2 === 0) {
                 // Partenaire Physique
                 $partenaire = new \App\Entity\PartenairePhysique();
-                $partenaire->setPrenom("Prénom{$i}");
-                $partenaire->setNomFamille("NomFamille{$i}");
-                $partenaire->setDateNaissance(new \DateTime('-' . rand(20, 60) . ' years'));
+                $partenaire->setPrenom($faker->firstName);
+                $partenaire->setNomFamille($faker->lastName);
+                $partenaire->setDateNaissance($faker->dateTimeBetween('-60 years', '-20 years'));
             } else {
                 // Partenaire Moral
                 $partenaire = new \App\Entity\PartenaireMoral();
-                $partenaire->setRaisonSociale("Entreprise{$i}");
-                $partenaire->setSiret(strval(rand(10000000000000, 99999999999999)));
-                $partenaire->setSecteurActivite('Secteur ' . $i);
+                $partenaire->setRaisonSociale($faker->company);
+                $partenaire->setSiret($faker->numerify('##############'));
+                $partenaire->setSecteurActivite($faker->jobTitle);
             }
-            $partenaire->setNom("Partenaire {$i}");
-            $partenaire->setEmail("partenaire{$i}@example.com");
-            $partenaire->setTelephone("+33" . rand(100000000, 999999999));
-            $partenaire->setAdresse("Adresse partenaire {$i}");
-            $partenaire->setSiteWeb("https://partenaire{$i}.fr");
-            $partenaire->setNotes("Notes sur le partenaire {$i}");
-            $partenaire->setDateCreation(new \DateTime('-' . rand(1, 60) . ' months'));
+
+            $partenaire->setNom("Partenaire $i");
+            $partenaire->setEmail($faker->unique()->companyEmail);
+            $partenaire->setTelephone($faker->phoneNumber);
+            $partenaire->setAdresse($faker->address);
+            $partenaire->setSiteWeb($faker->url);
+            $partenaire->setNotes($faker->realText(100));
+            $partenaire->setDateCreation($faker->dateTimeBetween('-5 years', 'now'));
             $partenaire->setNiveauRisque(\App\Enum\PartenaireNiveauRisqueEnum::cases()[array_rand(\App\Enum\PartenaireNiveauRisqueEnum::cases())]);
-            $partenaire->setVille("Ville {$i}");
-            $partenaire->setCodePostal(rand(10000, 99999));
-            $partenaire->setPays('France');
-            $partenaire->setDatePremiereCollaboration(new \DateTime('-' . rand(1, 60) . ' months'));
-            $partenaire->setNombreDelitsImplique(rand(0, 5));
+            $partenaire->setVille($faker->city);
+            $partenaire->setCodePostal((int) $faker->postcode);
+            $partenaire->setPays($faker->country);
+            $partenaire->setDatePremiereCollaboration($faker->dateTimeBetween('-5 years', 'now'));
+            $partenaire->setNombreDelitsImplique(rand(0, 2));
             $partenaire->setEstActif(true);
-            $partenaire->setCommentairesInternes("Commentaires internes partenaire {$i}");
+            $partenaire->setCommentairesInternes($faker->realText(150));
+
             $manager->persist($partenaire);
             $partenaires[] = $partenaire;
         }

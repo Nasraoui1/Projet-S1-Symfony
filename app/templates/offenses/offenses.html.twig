@@ -78,7 +78,7 @@
 
 <!-- Modal d'ajout -->
 <div id="add-offense-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
-    <div class="bg-[#101c2b] rounded-lg shadow-lg p-8 min-w-[600px] max-w-full max-h-[90vh] overflow-y-auto">
+    <div class="bg-slate-900 rounded-lg shadow-lg p-8 min-w-[600px] max-w-full max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-white text-lg font-semibold">Ajouter un délit</h2>
             <button type="button" class="text-gray-400 hover:text-white text-2xl font-bold leading-none focus:outline-none" data-close-modal="add-offense-modal">&times;</button>
@@ -184,7 +184,7 @@
 
 <!-- Modal de modification -->
 <div id="edit-offense-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
-    <div class="bg-[#101c2b] rounded-lg shadow-lg p-8 min-w-[600px] max-w-full max-h-[90vh] overflow-y-auto">
+    <div class="bg-slate-900 rounded-lg shadow-lg p-8 min-w-[600px] max-w-full max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-white text-lg font-semibold">Modifier le délit</h2>
             <button type="button" class="text-gray-400 hover:text-white text-2xl font-bold leading-none focus:outline-none" data-close-modal="edit-offense-modal">&times;</button>
@@ -319,7 +319,7 @@
     // Fonction pour générer le HTML des détails d'une offense
     function generateOffenseDetailsHtml(offense) {
         return `
-            <div class="bg-[#101c2b] rounded-lg shadow-lg p-6 h-full overflow-y-auto">
+            <div class="bg-slate-900 rounded-lg shadow-lg p-6 h-full overflow-y-auto">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-white text-xl font-semibold">Détails du délit</h2>
                     ${isAdmin ? `<button type="button" class="px-3 py-1 rounded text-xs font-semibold transition-colors focus:outline-none bg-blue-700 text-blue-200 hover:bg-blue-800" onclick="editOffense(${offense.id})">
