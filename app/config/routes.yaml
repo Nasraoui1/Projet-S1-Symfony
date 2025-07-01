@@ -3,3 +3,12 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+app_media:
+    path: /media
+    controller: App\Controller\MediaController::index
+
+app_media_upload:
+    path: /media/upload
+    controller: App\Controller\MediaController::upload
+    methods: [POST]

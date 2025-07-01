@@ -15,7 +15,9 @@
                 {% include 'media/components/filter_select.html.twig' with {label: 'Confidentiality', name: 'confidentiality', options: ['Confidentiality']} %}
             </div>
             <div class="flex gap-2 mb-6 justify-end">
-                {% include 'layout/components/add_button.html.twig' with {modal_id: 'add-media-modal'} %}
+                <button id="add-media-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    + Ajouter un fichier
+                </button>
             </div>
             <div class="bg-gray-900 rounded-lg shadow-lg overflow-x-auto">
                 {% include 'media/components/media_table.html.twig' with {media: media} %}
@@ -23,5 +25,94 @@
         </div>
     </div>
 </div>
-{% include 'layout/components/modal.html.twig' with {id: 'add-media-modal', title: '/media'} %}
-{% endblock %} 
+
+<input type="file" id="file-input" style="display: none;" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt">
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addBtn = document.getElementById('add-media-btn');
+    const fileInput = document.getElementById('file-input');
+    const mediaTable = document.querySelector('tbody');
+
+    addBtn.addEventListener('click', function() {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            uploadFile(file);
+        }
+    });
+
+    function uploadFile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        addBtn.disabled = true;
+        addBtn.textContent = 'Upload en cours...';
+
+        fetch('{{ path('app_media_upload') }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                addRowToTable(data.document);
+                showNotification('Fichier ajouté avec succès!', 'success');
+            } else {
+                showNotification(data.error || 'Erreur lors de l\'upload', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            showNotification('Erreur lors de l\'upload', 'error');
+        })
+        .finally(() => {
+            addBtn.disabled = false;
+            addBtn.textContent = '+ Ajouter un fichier';
+            fileInput.value = '';
+        });
+    }
+
+    function addRowToTable(document) {
+        const noMediaRow = mediaTable.querySelector('td[colspan="6"]');
+        if (noMediaRow) {
+            noMediaRow.parentElement.remove();
+        }
+
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td class="px-4 py-2 text-white">${document.title}</td>
+            <td class="px-4 py-2 text-gray-300">${document.type}</td>
+            <td class="px-4 py-2 text-gray-300">${document.date}</td>
+            <td class="px-4 py-2 text-gray-300">${document.offense}</td>
+            <td class="px-4 py-2">
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-700 text-blue-200">
+                    ${document.confidentiality}
+                </span>
+            </td>
+            <td class="px-4 py-2 flex gap-2">
+                <button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">Modifier</button>
+                <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">Supprimer</button>
+            </td>
+        `;
+        mediaTable.appendChild(newRow);
+    }
+
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 px-4 py-2 rounded-lg text-white z-50 ${
+            type === 'success' ? 'bg-green-600' : 'bg-red-600'
+        }`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+});
+</script>
+{% endblock %}

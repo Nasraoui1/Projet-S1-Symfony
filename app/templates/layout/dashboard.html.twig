@@ -1,5 +1,68 @@
-{% extends "layout/base.html.twig" %}
+{% extends "layout/dashboard.html.twig" %}
 
-{% block navbar %}
-    {% include "layout/components/navbar.html.twig" %}
+{% block content %}
+<div class="min-h-screen bg-slate-900 flex flex-col">
+    <div class="flex-1 flex flex-col items-center w-full">
+        <div class="w-full max-w-5xl mx-auto mt-8">
+            <h1 class="text-3xl font-bold text-white mb-2">Media Management</h1>
+            <p class="text-gray-400 mb-6">Manage and organize media files and evidence related to political offenses.</p>
+            <div class="mb-4">
+                <input type="text" placeholder="Rechercher des fichiers" class="w-full bg-slate-800 text-gray-200 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div class="flex gap-2 mb-6">
+                {% include 'media/components/filter_select.html.twig' with {label: 'Type', name: 'type', options: ['Type']} %}
+                {% include 'media/components/filter_select.html.twig' with {label: 'Date', name: 'date', options: ['Date']} %}
+                {% include 'media/components/filter_select.html.twig' with {label: 'Confidentiality', name: 'confidentiality', options: ['Confidentiality']} %}
+            </div>
+            <div class="flex gap-2 mb-6 justify-end">
+                <button id="add-media-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    + Ajouter un fichier
+                </button>
+            </div>
+            <div class="bg-gray-900 rounded-lg shadow-lg overflow-x-auto">
+                {% include 'media/components/media_table.html.twig' with {media: media} %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="file" id="file-input" style="display: none;" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt">
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addBtn = document.getElementById('add-media-btn');
+    const fileInput = document.getElementById('file-input');
+
+    addBtn.addEventListener('click', function() {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            uploadFile(file);
+        }
+    });
+
+    function uploadFile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        addBtn.disabled = true;
+        addBtn.textContent = 'Upload en cours...';
+
+        fetch('{{ path('app_media_upload') }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            window.location.reload();
+        })
+        .catch(error => {
+            window.location.reload();
+        });
+    }
+});
+</script>
 {% endblock %}
